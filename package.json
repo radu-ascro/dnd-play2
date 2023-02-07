@@ -14,6 +14,7 @@
     "@dnd-kit/utilities": "^3.2.1",
     "@runeffective/evo-design-system": "^3.0.0",
     "@types/styled-components": "^5.1.26",
+    "@mojs/core": "1.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "styled-components": "^5.3.6"

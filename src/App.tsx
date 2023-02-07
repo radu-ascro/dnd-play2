@@ -1,7 +1,7 @@
 import './App.css';
-import { Toast } from '@runeffective/evo-design-system';
+import { Light, Toast } from '@runeffective/evo-design-system';
 import { ToastExample } from './ToastExample';
-import styled from 'styled-components';
+import styled, { ThemeProvider } from 'styled-components';
 import { DndContext } from '@dnd-kit/core';
 import { DragExample } from './DragExample';
 
@@ -13,12 +13,14 @@ const Container = styled.div`
 function App() {
   return (
     <Container>
-      <Toast>
-        <DndContext>
-          <ToastExample />
-          <DragExample />
-        </DndContext>
-      </Toast>
+      <ThemeProvider theme={Light}>
+        <Toast>
+          <DndContext>
+            <ToastExample />
+            <DragExample />
+          </DndContext>
+        </Toast>
+      </ThemeProvider>
     </Container>
   );
 }

@@ -1,5 +1,6 @@
 import {
   DraggableSyntheticListeners,
+  DragMoveEvent,
   DragOverlay,
   DragStartEvent,
   UniqueIdentifier,
@@ -11,6 +12,7 @@ import { Transform } from '@dnd-kit/utilities';
 import { Checkbox, useToast } from '@runeffective/evo-design-system';
 import * as React from 'react';
 import styled from 'styled-components';
+import { dropAnimation, useDropAnimation } from './animations';
 import {
   DragAndDropComponent,
   EDragAndDropState,
@@ -137,6 +139,9 @@ const DraggableOverlay = ({ showToast }: DraggableOverlayProps) => {
   const { active } = useDndContext();
   const toastHandling = useToast();
 
+  const { animateDrop, direction, lastDirection, shake, resetDropAnimation } =
+    useDropAnimation();
+
   const showToastMessage = () => {
     toastHandling.info({
       title: 'toast on drag',
@@ -152,7 +157,11 @@ const DraggableOverlay = ({ showToast }: DraggableOverlayProps) => {
         showToastMessage();
       }
     },
+    onDragMove: (event: DragMoveEvent) => {
+      animateDrop(event);
+    },
     onDragEnd: () => {
+      resetDropAnimation();
       setDraggableAsset(false);
     },
     onDragCancel: () => {
@@ -161,15 +170,18 @@ const DraggableOverlay = ({ showToast }: DraggableOverlayProps) => {
   });
 
   return (
-    <DragOverlay modifiers={[snapCenterToCrosshair]}>
+    <DragOverlay
+      modifiers={[snapCenterToCrosshair]}
+      dropAnimation={dropAnimation}
+    >
       {/* {active ? <Draggable dragging dragOverlay /> : null} */}
       {draggableAsset ? (
         <DragAndDropComponent
           assetMarker="Security | Badge Reader"
           state={EDragAndDropState.VALID}
-          direction={''}
-          lastDirection={''}
-          shake={false}
+          direction={direction}
+          lastDirection={lastDirection}
+          shake={shake}
         />
       ) : null}
     </DragOverlay>
