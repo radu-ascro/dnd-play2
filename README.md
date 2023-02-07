@@ -1,4 +1,4 @@
-## Test different ways to display toast messages.
+## Test different ways to display evo toast messages.
 
 Run `yarn install` to install the project dependencies.
 

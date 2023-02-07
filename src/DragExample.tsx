@@ -11,8 +11,13 @@ import { Transform } from '@dnd-kit/utilities';
 import { Checkbox, useToast } from '@runeffective/evo-design-system';
 import * as React from 'react';
 import styled from 'styled-components';
+import {
+  DragAndDropComponent,
+  EDragAndDropState,
+} from './DragAndDropComponent';
 
 import styles from './Draggable.css?inline';
+import { snapCenterToCrosshair } from './utils';
 
 interface WrapperProps {
   children: React.ReactNode;
@@ -128,6 +133,7 @@ interface DraggableOverlayProps {
   showToast: boolean;
 }
 const DraggableOverlay = ({ showToast }: DraggableOverlayProps) => {
+  const [draggableAsset, setDraggableAsset] = React.useState(false);
   const { active } = useDndContext();
   const toastHandling = useToast();
 
@@ -141,15 +147,31 @@ const DraggableOverlay = ({ showToast }: DraggableOverlayProps) => {
 
   useDndMonitor({
     onDragStart: () => {
+      setDraggableAsset(true);
       if (showToast) {
         showToastMessage();
       }
     },
+    onDragEnd: () => {
+      setDraggableAsset(false);
+    },
+    onDragCancel: () => {
+      setDraggableAsset(false);
+    },
   });
 
   return (
-    <DragOverlay>
-      {active ? <Draggable dragging dragOverlay /> : null}
+    <DragOverlay modifiers={[snapCenterToCrosshair]}>
+      {/* {active ? <Draggable dragging dragOverlay /> : null} */}
+      {draggableAsset ? (
+        <DragAndDropComponent
+          assetMarker="Security | Badge Reader"
+          state={EDragAndDropState.VALID}
+          direction={''}
+          lastDirection={''}
+          shake={false}
+        />
+      ) : null}
     </DragOverlay>
   );
 };
