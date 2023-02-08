@@ -13,6 +13,10 @@ import {
   DroppedDotWrapper,
   PinAssetMarkerWrapper,
 } from './DrandAndDropComponent.styles';
+import {
+  initialMouseSpeedAndAcceleration,
+  MouseSpeedAndAcceleration,
+} from './useMouseSpeedAndAcceleration';
 
 const shadowStartColor = hexToRgba(evoColor(''), 0);
 const shadowEndColor = hexToRgba(evoColor(''), 0.4);
@@ -49,6 +53,8 @@ interface DragAndDropComponentProps {
   direction?: string;
   lastDirection?: string;
   shake?: boolean;
+  lastMouseMoveData?: MouseSpeedAndAcceleration;
+  mouseMoveData?: MouseSpeedAndAcceleration;
 }
 
 export const DragAndDropComponent = ({
@@ -57,6 +63,8 @@ export const DragAndDropComponent = ({
   direction = '',
   lastDirection = '',
   shake = false,
+  mouseMoveData = initialMouseSpeedAndAcceleration,
+  lastMouseMoveData = initialMouseSpeedAndAcceleration,
 }: DragAndDropComponentProps) => (
   <DragAndDropWrapper>
     {state === EDragAndDropState.DROPPED && <ValidAnimDiv />}
@@ -65,6 +73,8 @@ export const DragAndDropComponent = ({
       direction={direction}
       lastDirection={lastDirection}
       shake={shake}
+      mouseMoveData={mouseMoveData}
+      lastMouseMoveData={lastMouseMoveData}
     >
       <PinWrapper marker={assetMarker} fill="white" />
     </PinAssetMarkerWrapper>

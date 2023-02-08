@@ -5,6 +5,10 @@ import { CSS } from '@dnd-kit/utilities';
 // @ts-ignore
 import mojs from '@mojs/core';
 import { useCallback, useRef, useState } from 'react';
+import {
+  MouseSpeedAndAcceleration,
+  useMouseSpeedAndAcceleration,
+} from './useMouseSpeedAndAcceleration';
 
 export const dropAnimation: DropAnimation = {
   duration: 500,
@@ -33,6 +37,10 @@ export const dropAnimation: DropAnimation = {
     ];
   },
 };
+interface IPoint {
+  x: number;
+  y: number;
+}
 
 export const invalidDropAnimation = (coords: IPoint, fillColor = 'blue') => {
   const centreCircle = new mojs.Shape({
@@ -88,14 +96,21 @@ export const invalidDropAnimation = (coords: IPoint, fillColor = 'blue') => {
   timeline.replay();
 };
 
-export const useDropAnimation = () => {
+export const useDragAnimation = () => {
   const [direction, setDirection] = useState<string>('');
   const [lastDirection, setLastDirection] = useState<string>('');
   const [shake, setShake] = useState<boolean>(false);
-  const dragEvent = useRef<Nullable<DragMoveEvent>>(null);
+
+  const [lastMouseMoveData, setLastMouseMoveData] = useState<
+    MouseSpeedAndAcceleration | undefined
+  >(undefined);
+
+  const dragEvent = useRef<DragMoveEvent | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const animateDrop = useCallback(
+  const { setEnableTrack, ...mouseMoveData } = useMouseSpeedAndAcceleration();
+
+  const animateDrag = useCallback(
     (event: DragMoveEvent) => {
       if (dragEvent.current) {
         const { pageX: ePageX } = event.activatorEvent as MouseEvent;
@@ -115,6 +130,7 @@ export const useDropAnimation = () => {
         }
       }
       dragEvent.current = event;
+      setLastMouseMoveData(mouseMoveData);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
@@ -124,19 +140,23 @@ export const useDropAnimation = () => {
         setShake(true);
       }, 100);
     },
-    [direction]
+    [direction, mouseMoveData]
   );
 
-  const resetDropAnimation = useCallback(() => {
+  const resetDragAnimation = useCallback(() => {
     setDirection('');
     setShake(false);
+    setLastMouseMoveData(undefined);
   }, []);
 
   return {
-    animateDrop,
+    animateDrag,
     direction,
     lastDirection,
     shake,
-    resetDropAnimation,
+    resetDragAnimation,
+    mouseMoveData,
+    lastMouseMoveData,
+    setEnableTrack,
   };
 };

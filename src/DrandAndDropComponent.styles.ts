@@ -10,6 +10,7 @@ import {
   DROP_SIZE,
 } from './constants';
 import { EDragAndDropState } from './DragAndDropComponent';
+import { MouseSpeedAndAcceleration } from './useMouseSpeedAndAcceleration';
 
 export const DragAndDropWrapper = styled.div`
   width: fit-content;
@@ -26,27 +27,30 @@ const dimensionAnimation = keyframes`
   }
 `;
 
-const shakeRightAnimation = keyframes`
-30%, 70% {
-  transform: rotate(-12deg);
-  left: -6px;
-}
+const PIN_MAX_ROTATION = 30;
+const SHAKE_MAX_ROTATION = 12;
 
+const getPinRotation = (movement: number) =>
+  Math.min(PIN_MAX_ROTATION, movement);
+
+const getShakeRotation = (movement: number) =>
+  Math.min(SHAKE_MAX_ROTATION, movement);
+
+const getShakeRightAnimation = (movement: number) => keyframes`
+30%, 70% {
+  transform: rotate(${-getShakeRotation(movement)}deg);
+}
 50% {
-  transform: rotate(12deg);
-  left: 6px;
+  transform: rotate(${getShakeRotation(movement)}deg);
 }
 `;
 
-const shakeLeftAnimation = keyframes`
+const getShakeLeftAnimation = (movement: number) => keyframes`
 30%, 70% {
-  transform: rotate(12deg);
-  left: 6px;
+  transform: rotate(${getShakeRotation(movement)}deg);
 }
-
 50% {
-  transform: rotate(-12deg);
-  left: -6px;
+  transform: rotate(${-getShakeRotation(movement)}deg);
 }
 `;
 
@@ -55,46 +59,51 @@ export const PinAssetMarkerWrapper = styled.div<{
   direction: string;
   lastDirection: string;
   shake: boolean;
+  lastMouseMoveData: MouseSpeedAndAcceleration;
+  mouseMoveData: MouseSpeedAndAcceleration;
 }>`
+  position: relative;
+  margin-bottom: 8px;
   width: ${DROP_INITIAL_SIZE}px;
   height: ${DROP_INITIAL_SIZE}px;
-  margin-bottom: 8px;
   animation: ${({ dragAndDropState }) =>
     dragAndDropState === EDragAndDropState.DROPPED
       ? css`
           ${dimensionAnimation} 0s 0.8s forwards
         `
       : 'none'};
-  position: relative;
-  left: ${({ direction }) =>
-    direction === '' ? '0' : direction === 'right' ? '15px' : '-15px'};
-  transform: ${({ direction }) =>
+  transform-origin: center 110%;
+  transform: ${({ direction, mouseMoveData }) =>
     direction === ''
       ? 'none'
       : direction === 'right'
-      ? 'rotate(30deg)'
-      : 'rotate(-30deg)'};
-  ${({ shake, lastDirection }) =>
+      ? `rotate(${getPinRotation(mouseMoveData.movement)}deg)`
+      : `rotate(${-getPinRotation(mouseMoveData.movement)}deg)`};
+  ${({ shake, lastDirection, lastMouseMoveData }) =>
     shake === true
       ? lastDirection === 'right'
         ? css`
-            animation: ${shakeRightAnimation} 0.6s 0.2s;
+            animation: ${getShakeRightAnimation(lastMouseMoveData.movement)}
+              0.6s 0.2s;
           `
         : css`
-            animation: ${shakeLeftAnimation} 0.6s 0.2s;
+            animation: ${getShakeLeftAnimation(lastMouseMoveData.movement)} 0.6s
+              0.2s;
           `
       : ''};
-  transition: transform 1s, left 1s;
-
-  [aria-label='asset-marker'] {
-    ${({ direction }) =>
-      direction === ''
-        ? ''
-        : direction === 'right'
-        ? 'rotate: -30deg; translate: 6px 14px;'
-        : 'rotate: 30deg; translate: 25px 1px;'};
-    transition: rotate 1s, translate 1s;
-  }
+  transition: transform 0.2s;
+  /*
+  TODO find a better way to animate the icon
+  Remove for now since it causes animation issues.
+    [aria-label='asset-marker'] {
+    transform: ${({ direction }) =>
+    direction === ''
+      ? 'none'
+      : direction === 'right'
+      ? 'rotate(-30deg) translate(-21px, 9px)'
+      : 'rotate(30deg) translate(9px, -21px)'};
+    transition: rotate 0.2s, translate 0.2s;
+  }*/
 `;
 
 export const DroppedDotWrapper = styled.div`
